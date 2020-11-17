@@ -13,5 +13,19 @@ func NewRouter() *Router {
 func (router *Router) GetEngine() *gin.Engine {
 	r := gin.Default()
 
+	rc := NewRouteController()
+	v1 := r.Group("/v1")
+	{
+		v1.GET("/reachable", rc.Reachable)
+	}
+
 	return r
+}
+
+// Contains all routes.
+type RouteController struct{}
+
+// Returns a new RouteController instance.
+func NewRouteController() *RouteController {
+	return &RouteController{}
 }
