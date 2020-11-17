@@ -1,0 +1,17 @@
+package routes
+
+import "github.com/gin-gonic/gin"
+
+type Router struct{}
+
+// Creates a new Router instance.
+func NewRouter() *Router {
+	return &Router{}
+}
+
+// Returns a gin.Engine with the necessary setup for the server.
+func (router *Router) GetEngine() *gin.Engine {
+	r := gin.Default()
+
+	return r
+}
