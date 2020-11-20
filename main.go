@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Cardsity/management-api/db"
 	"github.com/Cardsity/management-api/routes"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -33,6 +34,12 @@ func config() {
 		log.Panic("No JWT key was set")
 	}
 
+	// Check if a DSN key was set
+	dbDsn := viper.GetString("dbDsn")
+	if dbDsn == "" {
+		log.Panic("No database DSN was set")
+	}
+
 	// Default values
 	viper.SetDefault("port", 5000)
 
@@ -41,6 +48,9 @@ func config() {
 
 func main() {
 	config()
+
+	db.SetupDatabaseConnection()
+	db.RunMigrations()
 
 	// Get the engine
 	router := routes.NewRouter()
