@@ -27,6 +27,12 @@ func config() {
 		log.Warn("Failed to read in configuration file: ", err)
 	}
 
+	// Check if a JWT key was set
+	jwtKey := viper.GetString("jwtKey")
+	if jwtKey == "" {
+		log.Panic("No JWT key was set")
+	}
+
 	// Default values
 	viper.SetDefault("port", 5000)
 
