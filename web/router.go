@@ -1,4 +1,4 @@
-package routes
+package web
 
 import "github.com/gin-gonic/gin"
 
@@ -17,6 +17,11 @@ func (router *Router) GetEngine() *gin.Engine {
 	v1 := r.Group("/v1")
 	{
 		v1.GET("/reachable", rc.Reachable)
+
+		auth := v1.Group("/auth")
+		{
+			auth.POST("/register", rc.Register)
+		}
 	}
 
 	return r

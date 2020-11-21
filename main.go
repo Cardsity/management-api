@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/Cardsity/management-api/db"
-	"github.com/Cardsity/management-api/routes"
+	"github.com/Cardsity/management-api/web"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"strconv"
@@ -53,7 +53,7 @@ func main() {
 	db.RunMigrations()
 
 	// Get the engine
-	router := routes.NewRouter()
+	router := web.NewRouter()
 	r := router.GetEngine()
 
 	// Run the server
