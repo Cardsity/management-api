@@ -30,18 +30,25 @@ func GetDefaultArgon2IDConfig() *Argon2IDConfig {
 	}
 }
 
-// Uses Argon2ID to hash the supplied string with the supplied config.
-func Argon2IDHashString(s string, config *Argon2IDConfig) (string, error) {
-	hash, salt, err := argon2idHash([]byte(s), config)
-	if err != nil {
-		return "", err
-	}
+// Hashes a string using argon2id with the supplied salt and config.
+func argon2idHashStringWithSalt(s string, salt []byte, config *Argon2IDConfig) (string, error) {
+	hash := argon2idHash([]byte(s), salt, config)
 
 	b64Hash := base64.RawStdEncoding.EncodeToString(hash)
 	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
 
 	full := fmt.Sprintf(config.Format, argon2.Version, config.Memory, config.Time, config.Threads, b64Salt, b64Hash)
 	return full, nil
+}
+
+// Uses Argon2ID to hash the supplied string with the supplied config. It generates a random salt. Acts as a public-facing
+// wrapper around argon2idHashStringWithSalt.
+func Argon2IDHashString(s string, config *Argon2IDConfig) (string, error) {
+	salt, err := generateSalt(16)
+	if err != nil {
+		return "", err
+	}
+	return argon2idHashStringWithSalt(s, salt, config)
 }
 
 // Compares the supplied string with that hash.
@@ -72,15 +79,9 @@ func Argon2IDHashCompare(s, hash string) (bool, error) {
 	return subtle.ConstantTimeCompare(decodedHash, comparisonHash) == 1, nil
 }
 
-// Hashes the supplied bytes and config with Argon2ID.
-func argon2idHash(input []byte, config *Argon2IDConfig) (hash, salt []byte, err error) {
-	salt, err = generateSalt(16)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	hash = argon2.IDKey(input, salt, config.Time, config.Memory, config.Threads, config.KeyLen)
-	return hash, salt, nil
+// Hashes the supplied input and salt bytes and config with Argon2ID.
+func argon2idHash(input, salt []byte, config *Argon2IDConfig) (hash []byte) {
+	return argon2.IDKey(input, salt, config.Time, config.Memory, config.Threads, config.KeyLen)
 }
 
 // Generates a salt of supplied length.

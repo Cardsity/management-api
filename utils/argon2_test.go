@@ -4,6 +4,20 @@ import (
 	"testing"
 )
 
+func TestArgon2idHashStringWithSalt(t *testing.T) {
+	input := "Hello world!"
+	salt := []byte{240, 244, 57, 235, 142, 133, 0, 160, 193, 40, 70, 30, 235, 51, 79, 73}
+	config := GetDefaultArgon2IDConfig()
+
+	hash, err := argon2idHashStringWithSalt(input, salt, config)
+	if err != nil {
+		t.Errorf("Hashing 'Hello world!' produces an error: %v.", err)
+	}
+	if hash != "$argon2id$v=19$m=65536,t=1,p=4$8PQ5646FAKDBKEYe6zNPSQ$VavIZwx2xsUcvFDOtTpIfgQdwmyf7aUSywn8W8Sueho" {
+		t.Error("Hashing 'Hello world!' does not return the right result.")
+	}
+}
+
 func TestArgon2IDHashCompare(t *testing.T) {
 	tables := []struct {
 		hash  string
@@ -27,7 +41,7 @@ func TestArgon2IDHashCompare(t *testing.T) {
 	}
 }
 
-func TestArgon2IDHash(t *testing.T) {
+func TestArgon2IDHashAndCompare(t *testing.T) {
 	config := GetDefaultArgon2IDConfig()
 	hash, err := Argon2IDHashString("Cardsity", config)
 	if err != nil {
