@@ -21,6 +21,7 @@ func (router *Router) GetEngine() *gin.Engine {
 		auth := v1.Group("/auth")
 		{
 			auth.POST("/register", rc.Register)
+			auth.POST("/login", rc.Login)
 		}
 	}
 

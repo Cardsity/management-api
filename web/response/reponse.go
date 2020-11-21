@@ -54,6 +54,14 @@ func InternalError(c *gin.Context) {
 	c.JSON(http.StatusInternalServerError, NewApiErrorResponse([]string{ErrorInternal}))
 }
 
+func NotFound(c *gin.Context) {
+	c.JSON(http.StatusNotFound, NewApiErrorResponse([]string{ErrorNotFound}))
+}
+
+func Forbidden(c *gin.Context) {
+	c.JSON(http.StatusForbidden, NewApiErrorResponse([]string{ErrorForbidden}))
+}
+
 func Ok(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusOK, NewApiOkResponse(data))
 }

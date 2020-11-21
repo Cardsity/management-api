@@ -28,7 +28,7 @@ func createClaim(claim Claim) jwt.MapClaims {
 }
 
 type UserClaim struct {
-	UserId int32
+	UserId uint
 }
 
 func (uc *UserClaim) ToClaim() ClaimOptions {
@@ -43,7 +43,7 @@ func (uc *UserClaim) ToClaim() ClaimOptions {
 }
 
 // Returns a new UserClaim instance.
-func NewUserClaim(userId int32) UserClaim {
+func NewUserClaim(userId uint) UserClaim {
 	return UserClaim{
 		UserId: userId,
 	}
