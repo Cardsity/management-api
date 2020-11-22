@@ -101,6 +101,31 @@ func (r *userRepository) GenerateSessionToken(user models.User) RepositoryResult
 	}
 }
 
+// Returns a user by the provided session token. It will only search for tokens that are not expired, yet.
+func (r *userRepository) GetBySessionToken(sessionToken string) RepositoryResult {
+	st := models.SessionToken{
+		Token: sessionToken,
+	}
+	result := (*r.db).Where(&st).Where("valid_until > ?", time.Now()).Preload("User").First(&st)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return RepositoryResult{
+				RawError: result.Error,
+				Error:    ErrorRecordNotFound,
+			}
+		}
+
+		return RepositoryResult{
+			RawError: result.Error,
+			Error:    ErrorDatabase,
+		}
+	}
+
+	return RepositoryResult{
+		Result: st.User,
+	}
+}
+
 // Creates the supplied models.User instance.
 func (r *userRepository) Create(user *models.User) RepositoryResult {
 	result := (*r.db).Create(user)

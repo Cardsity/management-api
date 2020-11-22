@@ -1,6 +1,9 @@
 package web
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/Cardsity/management-api/web/middleware"
+	"github.com/gin-gonic/gin"
+)
 
 type Router struct{}
 
@@ -12,6 +15,10 @@ func NewRouter() *Router {
 // Returns a gin.Engine with the necessary setup for the server.
 func (router *Router) GetEngine() *gin.Engine {
 	r := gin.Default()
+
+	r.Use(middleware.AuthorizationHeaderParser())
+
+	// TODO: Use the .Error function from gin.Context for error handling
 
 	rc := NewRouteController()
 	v1 := r.Group("/v1")
