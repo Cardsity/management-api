@@ -1,12 +1,12 @@
 package web
 
 import (
-	"github.com/Cardsity/management-api/db"
+	"github.com/Cardsity/management-api/db/models"
+	"github.com/Cardsity/management-api/db/repositories"
 	"github.com/Cardsity/management-api/jwt"
 	"github.com/Cardsity/management-api/utils"
 	"github.com/Cardsity/management-api/web/response"
 	"github.com/gin-gonic/gin"
-	"github.com/thanhpk/randstr"
 	"time"
 )
 
@@ -28,7 +28,10 @@ func (rc *RouteController) Register(c *gin.Context) {
 		return
 	}
 
-	// TODO: Check password for minimum requirements
+	if !utils.MeetsPasswordRequirements(userReq.Password) {
+		response.BadRequest(c, response.ErrorPasswordRequirementsNotMet)
+		return
+	}
 
 	hashedPassword, err := utils.Argon2IDHashString(userReq.Password, utils.GetDefaultArgon2IDConfig())
 	if err != nil {
@@ -37,22 +40,14 @@ func (rc *RouteController) Register(c *gin.Context) {
 	}
 
 	// Create the user
-	user := db.User{
+	user := models.User{
 		Username: userReq.Username,
 		Password: hashedPassword,
 		Admin:    false,
 	}
-	result := db.Db.Create(&user)
-	if result.Error != nil {
-		// Check if the error is due to a unique violation in the username field
-		// Code 23505 stands for "unique_violation"
-		if result.Error.Error() == "ERROR: duplicate key value violates unique constraint \"users_username_key\" (SQLSTATE 23505)" {
-			response.Conflict(c, response.ErrorDuplicateUsername)
-			return
-		}
-
-		// Fallback in case something other goes wrong
-		response.InternalError(c)
+	repoResult := repositories.UserRepo.Create(&user)
+	if repoResult.Error != nil {
+		repoResult.HandleGin(c)
 		return
 	}
 
@@ -80,24 +75,14 @@ func (rc *RouteController) Login(c *gin.Context) {
 	}
 
 	// Get the user
-	var user db.User
-	result := db.Db.Where(&db.User{
-		Username: userReq.Username,
-	}).First(&user)
-	if result.Error != nil {
-		// The record was not found
-		if result.Error.Error() == "record not found" {
-			response.NotFound(c)
-			return
-		}
-
-		// Fallback
-		response.InternalError(c)
-		return
+	repoResult := repositories.UserRepo.GetByUsername(userReq.Username)
+	if repoResult.Error != nil {
+		repoResult.HandleGin(c)
 	}
+	user := repoResult.Result.(models.User)
 
 	// Verify password
-	equal, err := utils.Argon2IDHashCompare(userReq.Password, user.Password)
+	equal, err := user.IsPasswordEqual(userReq.Password)
 	if err != nil {
 		response.InternalError(c)
 		return
@@ -108,19 +93,12 @@ func (rc *RouteController) Login(c *gin.Context) {
 	}
 
 	// Generate a session token
-	// We assume that the token is not unique here but on the model we said that it is
-	validUntil := time.Now().Add(time.Hour * 24) // A JWT is also valid for 24 hours
-	sessionTokenStr := randstr.Hex(40)
-	sessionToken := db.SessionToken{
-		Token:      sessionTokenStr,
-		ValidUntil: validUntil,
-		User:       user,
-	}
-	result = db.Db.Create(&sessionToken)
-	if result.Error != nil {
+	repoResult = repositories.UserRepo.GenerateSessionToken(user)
+	if repoResult.Error != nil {
 		response.InternalError(c)
 		return
 	}
+	sessionToken := repoResult.Result.(models.SessionToken)
 
 	// Create a JWT
 	userClaim := jwt.NewUserClaim(user.ID)
@@ -134,7 +112,7 @@ func (rc *RouteController) Login(c *gin.Context) {
 		UserID:       user.ID,
 		Username:     user.Username,
 		Jwt:          jwtStr,
-		SessionToken: sessionTokenStr,
-		ValidUntil:   validUntil,
+		SessionToken: sessionToken.Token,
+		ValidUntil:   sessionToken.ValidUntil,
 	})
 }

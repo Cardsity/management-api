@@ -42,8 +42,8 @@ func NewApiOkResponse(data interface{}) BasicApiResponseOk {
 	}
 }
 
-func BadRequest(c *gin.Context) {
-	c.JSON(http.StatusBadRequest, NewApiErrorResponse([]string{ErrorBadRequest}))
+func BadRequest(c *gin.Context, additionalReasons ...string) {
+	c.JSON(http.StatusBadRequest, NewApiErrorResponse(append([]string{ErrorBadRequest}, additionalReasons...)))
 }
 
 func Conflict(c *gin.Context, reason string) {

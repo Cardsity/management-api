@@ -43,9 +43,9 @@ func ParseJwt(tokenStr string) (jwt.Claims, error) {
 		return nil, err
 	}
 
-	// TODO: Do some type checking here. If we add more JWTs in the future, a JWT with multiple can be valid for another
-	//       JWT which is not a good case since it can lead to security issues. We can forget this until we have more
-	//       claims.
+	// TODO: Do some type checking here. If we add more JWTs in the future, a JWT with multiple claims can be valid for
+	//       another JWT which is not a good case since it can lead to security issues. We can forget this until we have
+	//       more claims.
 	if !token.Valid {
 		return nil, fmt.Errorf("token is invalid")
 	}
