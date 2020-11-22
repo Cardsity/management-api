@@ -28,6 +28,8 @@ func (rc *RouteController) Register(c *gin.Context) {
 		return
 	}
 
+	// TODO: Check password for minimum requirements
+
 	hashedPassword, err := utils.Argon2IDHashString(userReq.Password, utils.GetDefaultArgon2IDConfig())
 	if err != nil {
 		response.InternalError(c)
@@ -63,6 +65,7 @@ func (rc *RouteController) Register(c *gin.Context) {
 
 type UserLoginResponse struct {
 	UserID       uint      `json:"userId"`
+	Username     string    `json:"username"`
 	Jwt          string    `json:"jwt"`
 	SessionToken string    `json:"sessionToken"`
 	ValidUntil   time.Time `json:"validUntil"`
@@ -129,6 +132,7 @@ func (rc *RouteController) Login(c *gin.Context) {
 
 	response.Ok(c, UserLoginResponse{
 		UserID:       user.ID,
+		Username:     user.Username,
 		Jwt:          jwtStr,
 		SessionToken: sessionTokenStr,
 		ValidUntil:   validUntil,
