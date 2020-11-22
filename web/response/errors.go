@@ -7,4 +7,5 @@ const (
 	ErrorNotFound                   = "ERR_NOT_FOUND"
 	ErrorForbidden                  = "ERR_FORBIDDEN"
 	ErrorPasswordRequirementsNotMet = "ERR_PASSWORD_REQUIREMENTS_NOT_MET"
+	ErrorNoValidBearerSupplied      = "ERR_NO_VALID_BEARER_SUPPLIED"
 )

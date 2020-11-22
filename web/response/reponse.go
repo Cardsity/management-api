@@ -58,8 +58,8 @@ func NotFound(c *gin.Context) {
 	c.JSON(http.StatusNotFound, NewApiErrorResponse([]string{ErrorNotFound}))
 }
 
-func Forbidden(c *gin.Context) {
-	c.JSON(http.StatusForbidden, NewApiErrorResponse([]string{ErrorForbidden}))
+func Forbidden(c *gin.Context, additionalReasons ...string) {
+	c.JSON(http.StatusForbidden, NewApiErrorResponse(append([]string{ErrorForbidden}, additionalReasons...)))
 }
 
 func Ok(c *gin.Context, data interface{}) {
