@@ -25,6 +25,7 @@ type BlackCard struct {
 
 // Sets the blank count before saving a black card.
 func (bc *BlackCard) BeforeSave(tx *gorm.DB) error {
+	// Note: This won't work if we call .Update, but calling .Updates with the model will work
 	bc.Blanks = uint(utils.GetBlankCount(bc.Text)) // Won't return a value below 1
 	return nil
 }

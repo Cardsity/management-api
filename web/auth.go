@@ -15,7 +15,7 @@ type UserRequest struct {
 	Password string `json:"password" binding:"required"`
 }
 
-type UserCreationResult struct {
+type BasicUserInformationResult struct {
 	ID       uint   `json:"id"`
 	Username string `json:"username"`
 }
@@ -52,7 +52,7 @@ func (rc *RouteController) Register(c *gin.Context) {
 	}
 
 	// Return information about the created user
-	response.Ok(c, UserCreationResult{
+	response.Ok(c, BasicUserInformationResult{
 		ID:       user.ID,
 		Username: user.Username,
 	})
@@ -114,5 +114,14 @@ func (rc *RouteController) Login(c *gin.Context) {
 		Jwt:          jwtStr,
 		SessionToken: sessionToken.Token,
 		ValidUntil:   sessionToken.ValidUntil,
+	})
+}
+
+// Shows some basic information about the authenticated users.
+func (rc *RouteController) AuthInfo(c *gin.Context) {
+	user := c.MustGet("user").(models.User)
+	response.Ok(c, BasicUserInformationResult{
+		ID:       user.ID,
+		Username: user.Username,
 	})
 }

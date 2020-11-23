@@ -29,6 +29,7 @@ func (router *Router) GetEngine() *gin.Engine {
 		{
 			auth.POST("/register", rc.Register)
 			auth.POST("/login", rc.Login)
+			auth.GET("/info", middleware.AuthRequired(), rc.AuthInfo)
 		}
 	}
 
