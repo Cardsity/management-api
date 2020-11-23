@@ -12,6 +12,7 @@ type User struct {
 	Password      string `gorm:"not null"`
 	Admin         bool
 	SessionTokens []SessionToken
+	Decks         []Deck `gorm:"foreignKey:OwnerID"`
 }
 
 // Compares the supplied password with the password of the user instance.

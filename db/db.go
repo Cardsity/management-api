@@ -14,7 +14,7 @@ var Db *gorm.DB
 // Runs the automatic database migrations of gorm and more advanced migrations (if needed).
 func RunMigrations() {
 	// Basic gorm migrations
-	err := Db.AutoMigrate(&models.User{}, &models.SessionToken{})
+	err := Db.AutoMigrate(&models.User{}, &models.SessionToken{}, &models.Deck{}, &models.BlackCard{}, &models.WhiteCard{})
 	if err != nil {
 		log.Panic(err)
 	}
