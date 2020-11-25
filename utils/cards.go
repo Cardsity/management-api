@@ -14,3 +14,9 @@ func GetBlankCount(text string) int {
 		return 1
 	}
 }
+
+// A card is only valid if it has fewer than 101 characters and at least 1 character. If one card of the deck does not follow
+// this rules, the deck won't be valid.
+func CardTextIsValid(text string) bool {
+	return len(text) > 0 && len(text) < 101 // 1-100
+}

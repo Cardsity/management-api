@@ -10,11 +10,11 @@ import (
 )
 
 var UserRepo = &userRepository{
-	db: &db.Db,
+	BaseRepository{db: &db.Db},
 }
 
 type userRepository struct {
-	db **gorm.DB // A pointer to the database pointer so it will work when we update the database object
+	BaseRepository
 }
 
 func (r *userRepository) Get(user models.User) RepositoryResult {

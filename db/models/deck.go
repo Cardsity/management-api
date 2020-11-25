@@ -9,6 +9,7 @@ import (
 type Deck struct {
 	gorm.Model
 	Name       string `gorm:"not null"`
+	Official   bool   `gorm:"default:0;not null"`
 	OwnerID    sql.NullInt64
 	Owner      User `gorm:"constraint:OnDelete:SET NULL"`
 	BlackCards []BlackCard

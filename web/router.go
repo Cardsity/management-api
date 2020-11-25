@@ -31,6 +31,11 @@ func (router *Router) GetEngine() *gin.Engine {
 			auth.POST("/login", rc.Login)
 			auth.GET("/info", middleware.AuthRequired(), rc.AuthInfo)
 		}
+
+		decks := v1.Group("/decks")
+		{
+			decks.POST("", rc.DeckCreate)
+		}
 	}
 
 	return r
