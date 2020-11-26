@@ -16,8 +16,18 @@ type UserRequest struct {
 }
 
 type BasicUserInformationResult struct {
-	ID       uint   `json:"id"`
-	Username string `json:"username"`
+	ID          uint   `json:"id"`
+	Username    string `json:"username"`
+	models.Role `json:"role,omitempty"`
+}
+
+// Returns an instance of BasicUserInformationResult with the data from the supplied models.User instance.
+func basicUserInformation(u models.User) BasicUserInformationResult {
+	return BasicUserInformationResult{
+		ID:       u.ID,
+		Username: u.Username,
+		Role:     u.Role,
+	}
 }
 
 // Responsible for user creation.
@@ -52,15 +62,13 @@ func (rc *RouteController) Register(c *gin.Context) {
 	}
 
 	// Return information about the created user
-	response.Ok(c, BasicUserInformationResult{
-		ID:       user.ID,
-		Username: user.Username,
-	})
+	response.Ok(c, basicUserInformation(user))
 }
 
 type UserLoginResponse struct {
-	UserID       uint      `json:"userId"`
-	Username     string    `json:"username"`
+	UserID       uint   `json:"userId"`
+	Username     string `json:"username"`
+	models.Role  `json:"role,omitempty"`
 	Jwt          string    `json:"jwt"`
 	SessionToken string    `json:"sessionToken"`
 	ValidUntil   time.Time `json:"validUntil"`
@@ -111,6 +119,7 @@ func (rc *RouteController) Login(c *gin.Context) {
 	response.Ok(c, UserLoginResponse{
 		UserID:       user.ID,
 		Username:     user.Username,
+		Role:         user.Role,
 		Jwt:          jwtStr,
 		SessionToken: sessionToken.Token,
 		ValidUntil:   sessionToken.ValidUntil,
@@ -120,8 +129,5 @@ func (rc *RouteController) Login(c *gin.Context) {
 // Shows some basic information about the authenticated users.
 func (rc *RouteController) AuthInfo(c *gin.Context) {
 	user := c.MustGet("user").(models.User)
-	response.Ok(c, BasicUserInformationResult{
-		ID:       user.ID,
-		Username: user.Username,
-	})
+	response.Ok(c, basicUserInformation(user))
 }

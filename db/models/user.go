@@ -6,11 +6,20 @@ import (
 	"time"
 )
 
+type Role string
+
+const (
+	Developer   Role = "developer"
+	Contributor Role = "contributor"
+	Supporter   Role = "supporter"
+)
+
 type User struct {
 	gorm.Model
 	Username      string `gorm:"index;unique;not null"`
 	Password      string `gorm:"not null"`
 	Admin         bool
+	Role          Role
 	SessionTokens []SessionToken
 	Decks         []Deck `gorm:"foreignKey:OwnerID"`
 }
