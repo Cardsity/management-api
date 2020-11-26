@@ -35,6 +35,7 @@ func (router *Router) GetEngine() *gin.Engine {
 		decks := v1.Group("/decks")
 		{
 			decks.POST("", rc.DeckCreate)
+			decks.GET("/:id", rc.DeckInfo)
 		}
 	}
 

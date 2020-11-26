@@ -6,6 +6,7 @@ import (
 	"github.com/Cardsity/management-api/utils"
 	"github.com/Cardsity/management-api/web/response"
 	"github.com/gin-gonic/gin"
+	"strconv"
 	"strings"
 )
 
@@ -27,7 +28,7 @@ func (dcr *DeckCreateRequest) AmountWhiteCards() int {
 }
 
 type DeckCreateResponse struct {
-	Id               uint `json:"id"`
+	ID               uint `json:"id"`
 	AmountBlackCards int  `json:"amountBlackCards"`
 	AmountWhiteCards int  `json:"amountWhiteCards"`
 }
@@ -106,8 +107,71 @@ func (rc *RouteController) DeckCreate(c *gin.Context) {
 	}
 
 	response.Ok(c, DeckCreateResponse{
-		Id:               deck.ID,
+		ID:               deck.ID,
 		AmountBlackCards: amountBlackCards,
 		AmountWhiteCards: amountWhiteCards,
 	})
+}
+
+type DeckInfoResponseBlackCard struct {
+	ID     uint   `json:"id"`
+	Text   string `json:"text"`
+	Blanks uint   `json:"blanks"`
+}
+
+type DeckInfoResponseWhiteCard struct {
+	ID   uint   `json:"id"`
+	Text string `json:"text"`
+}
+
+type DeckInfoResponse struct {
+	ID         uint                        `json:"id"`
+	Name       string                      `json:"name"`
+	Official   bool                        `json:"official"`
+	OwnerID    uint                        `json:"ownerId"`
+	BlackCards []DeckInfoResponseBlackCard `json:"blackCards"`
+	WhiteCards []DeckInfoResponseWhiteCard `json:"whiteCards"`
+}
+
+// Shows information about a deck
+func (rc *RouteController) DeckInfo(c *gin.Context) {
+	deckId, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		response.BadRequest(c)
+		return
+	}
+
+	// Get deck
+	repoResult := repositories.DeckRepo.GetById(uint(deckId), true)
+	if repoResult.Error != nil {
+		repoResult.HandleGin(c)
+		return
+	}
+	deck := repoResult.Result.(models.Deck)
+
+	// Generate deck info response
+	// TODO: Is there a better way to achieve this?
+	diResponse := DeckInfoResponse{
+		ID:         deck.ID,
+		Name:       deck.Name,
+		Official:   deck.Official,
+		OwnerID:    uint(deck.OwnerID.Int64),
+		BlackCards: []DeckInfoResponseBlackCard{},
+		WhiteCards: []DeckInfoResponseWhiteCard{},
+	}
+	for _, c := range deck.BlackCards {
+		diResponse.BlackCards = append(diResponse.BlackCards, DeckInfoResponseBlackCard{
+			ID:     c.ID,
+			Text:   c.Text,
+			Blanks: c.Blanks,
+		})
+	}
+	for _, c := range deck.WhiteCards {
+		diResponse.WhiteCards = append(diResponse.WhiteCards, DeckInfoResponseWhiteCard{
+			ID:   c.ID,
+			Text: c.Text,
+		})
+	}
+
+	response.Ok(c, diResponse)
 }
