@@ -1,5 +1,6 @@
 {
   "port": 5000,
   "jwtKey": "ChangeMe123",
-  "dbDsn": "user=cardsity password=cardsity dbname=cardsity host=127.0.0.1 port=5432"
+  "dbDsn": "user=cardsity password=cardsity dbname=cardsity host=127.0.0.1 port=5432",
+  "gameServerAccessKey": "ChangeMe123"
 }

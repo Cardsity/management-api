@@ -28,22 +28,22 @@ func config() {
 		log.Warn("Failed to read in configuration file: ", err)
 	}
 
-	// Check if a JWT key was set
-	jwtKey := viper.GetString("jwtKey")
-	if jwtKey == "" {
-		log.Panic("No JWT key was set")
-	}
-
-	// Check if a DSN key was set
-	dbDsn := viper.GetString("dbDsn")
-	if dbDsn == "" {
-		log.Panic("No database DSN was set")
-	}
+	ensureConfigKeyIsPresentString("jwtKey")
+	ensureConfigKeyIsPresentString("dbDsn")
+	ensureConfigKeyIsPresentString("gameServerAccessKey")
 
 	// Default values
 	viper.SetDefault("port", 5000)
 
 	log.Debug("Successfully loaded configuration")
+}
+
+// Checks if a config key is present. Panics this does not apply.
+func ensureConfigKeyIsPresentString(key string) {
+	v := viper.GetString(key)
+	if v == "" {
+		log.Panic("Config key '%v' was not set", key)
+	}
 }
 
 func main() {
