@@ -2,7 +2,9 @@ package web
 
 import (
 	"github.com/Cardsity/management-api/web/middleware"
+	"github.com/Cardsity/management-api/web/validators"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 type Router struct{}
@@ -15,6 +17,12 @@ func NewRouter() *Router {
 // Returns a gin.Engine with the necessary setup for the server.
 func (router *Router) GetEngine() *gin.Engine {
 	r := gin.Default()
+
+	// Register custom validators
+	err := validators.RegisterValidators()
+	if err != nil {
+		log.Fatal("Can not register custom validators:", err)
+	}
 
 	r.Use(middleware.AuthorizationHeaderParser())
 
@@ -36,6 +44,11 @@ func (router *Router) GetEngine() *gin.Engine {
 		{
 			decks.POST("", rc.DeckCreate)
 			decks.GET("/:id", rc.DeckInfo)
+		}
+
+		cards := v1.Group("/cards")
+		{
+			cards.GET("/random", middleware.GameServerAccessOnly(), rc.RandomCards)
 		}
 	}
 

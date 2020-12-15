@@ -119,9 +119,26 @@ type DeckInfoResponseBlackCard struct {
 	Blanks uint   `json:"blanks"`
 }
 
+// Returns a DeckInfoResponseBlackCard created from a models.BlackCard.
+func cardInfoResponseFromBlackCard(c models.BlackCard) DeckInfoResponseBlackCard {
+	return DeckInfoResponseBlackCard{
+		ID:     c.ID,
+		Text:   c.Text,
+		Blanks: c.Blanks,
+	}
+}
+
 type DeckInfoResponseWhiteCard struct {
 	ID   uint   `json:"id"`
 	Text string `json:"text"`
+}
+
+// Returns a DeckInfoResponseWhiteCard from a models.WhiteCard.
+func cardInfoResponseFromWhiteCard(c models.WhiteCard) DeckInfoResponseWhiteCard {
+	return DeckInfoResponseWhiteCard{
+		ID:   c.ID,
+		Text: c.Text,
+	}
 }
 
 type DeckInfoResponse struct {
@@ -160,17 +177,10 @@ func (rc *RouteController) DeckInfo(c *gin.Context) {
 		WhiteCards: []DeckInfoResponseWhiteCard{},
 	}
 	for _, c := range deck.BlackCards {
-		diResponse.BlackCards = append(diResponse.BlackCards, DeckInfoResponseBlackCard{
-			ID:     c.ID,
-			Text:   c.Text,
-			Blanks: c.Blanks,
-		})
+		diResponse.BlackCards = append(diResponse.BlackCards, cardInfoResponseFromBlackCard(c))
 	}
 	for _, c := range deck.WhiteCards {
-		diResponse.WhiteCards = append(diResponse.WhiteCards, DeckInfoResponseWhiteCard{
-			ID:   c.ID,
-			Text: c.Text,
-		})
+		diResponse.WhiteCards = append(diResponse.WhiteCards, cardInfoResponseFromWhiteCard(c))
 	}
 
 	response.Ok(c, diResponse)
