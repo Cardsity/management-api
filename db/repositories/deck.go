@@ -60,8 +60,6 @@ func (r *deckRepository) Get(deck models.Deck, preloadCards bool) RepositoryResu
 // Proxies the call to Get using the supplied id.
 func (r *deckRepository) GetById(id uint, preloadCards bool) RepositoryResult {
 	return r.Get(models.Deck{
-		Model: gorm.Model{
-			ID: id,
-		},
+		ID: id,
 	}, preloadCards)
 }

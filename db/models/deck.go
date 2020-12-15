@@ -7,7 +7,7 @@ import (
 )
 
 type Deck struct {
-	gorm.Model
+	ID         uint   `gorm:"primarykey"`
 	Name       string `gorm:"not null"`
 	Official   bool   `gorm:"default:0;not null"`
 	OwnerID    sql.NullInt64
@@ -17,7 +17,7 @@ type Deck struct {
 }
 
 type BlackCard struct {
-	gorm.Model
+	ID     uint `gorm:"primarykey"`
 	DeckID uint
 	Deck   Deck   `gorm:"constraint:OnDelete:CASCADE;not null"`
 	Text   string `gorm:"not null"`
@@ -32,7 +32,7 @@ func (bc *BlackCard) BeforeSave(tx *gorm.DB) error {
 }
 
 type WhiteCard struct {
-	gorm.Model
+	ID     uint `gorm:"primarykey"`
 	DeckID uint
 	Deck   Deck   `gorm:"constraint:OnDelete:CASCADE;not null"`
 	Text   string `gorm:"not null"`

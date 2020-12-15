@@ -2,7 +2,6 @@ package web
 
 import (
 	"github.com/Cardsity/management-api/db/models"
-	"github.com/Cardsity/management-api/db/repositories"
 	"github.com/Cardsity/management-api/jwt"
 	"github.com/Cardsity/management-api/utils"
 	"github.com/Cardsity/management-api/web/response"
@@ -16,7 +15,7 @@ type UserRequest struct {
 }
 
 type BasicUserInformationResult struct {
-	ID          uint   `json:"id"`
+	ID          uint   `json:"id,omitempty"`
 	Username    string `json:"username"`
 	models.Role `json:"role,omitempty"`
 }
@@ -50,19 +49,16 @@ func (rc *RouteController) Register(c *gin.Context) {
 	}
 
 	// Create the user
-	user := models.User{
-		Username: userReq.Username,
-		Password: hashedPassword,
-		Admin:    false,
-	}
-	repoResult := repositories.UserRepo.Create(&user)
-	if repoResult.Error != nil {
-		repoResult.HandleGin(c)
+	repoErr := rc.UserRepo.Create(userReq.Username, hashedPassword, false)
+	if repoErr.Err != nil {
+		repoErr.HandleGin(c)
 		return
 	}
 
 	// Return information about the created user
-	response.Ok(c, basicUserInformation(user))
+	response.Ok(c, BasicUserInformationResult{
+		Username: userReq.Username,
+	})
 }
 
 type UserLoginResponse struct {
@@ -83,11 +79,10 @@ func (rc *RouteController) Login(c *gin.Context) {
 	}
 
 	// Get the user
-	repoResult := repositories.UserRepo.GetByUsername(userReq.Username)
-	if repoResult.Error != nil {
-		repoResult.HandleGin(c)
+	user, repoErr := rc.UserRepo.GetByUsername(userReq.Username)
+	if repoErr.Err != nil {
+		repoErr.HandleGin(c)
 	}
-	user := repoResult.Result.(models.User)
 
 	// Verify password
 	equal, err := user.IsPasswordEqual(userReq.Password)
@@ -101,12 +96,12 @@ func (rc *RouteController) Login(c *gin.Context) {
 	}
 
 	// Generate a session token
-	repoResult = repositories.UserRepo.GenerateSessionToken(user)
-	if repoResult.Error != nil {
+	var sessionToken models.SessionToken
+	sessionToken, repoErr = rc.UserRepo.GenerateSessionToken(user.ID)
+	if repoErr.Err != nil {
 		response.InternalError(c)
 		return
 	}
-	sessionToken := repoResult.Result.(models.SessionToken)
 
 	// Create a JWT
 	userClaim := jwt.NewUserClaim(user.ID)

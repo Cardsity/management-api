@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Cardsity/management-api/db"
+	"github.com/Cardsity/management-api/db/repositories/gorm"
 	"github.com/Cardsity/management-api/web"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -49,11 +50,17 @@ func ensureConfigKeyIsPresentString(key string) {
 func main() {
 	config()
 
-	db.SetupDatabaseConnection()
-	db.RunMigrations()
+	database := db.SetupDatabaseConnection()
+	db.RunMigrations(database)
+
+	// TODO: Make this configurable
+	userRepo := gorm.UserRepository{BaseRepository: gorm.BaseRepository{Db: database}}
 
 	// Get the engine
-	router := web.NewRouter()
+	environment := web.RouteEnvironment{
+		UserRepo: userRepo,
+	}
+	router := web.NewRouter(environment)
 	r := router.GetEngine()
 
 	// Run the server

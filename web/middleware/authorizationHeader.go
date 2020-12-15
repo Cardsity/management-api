@@ -13,7 +13,7 @@ import (
 
 // A middleware that parses the 'Authorization' header field using a bearer token.
 // In this case, the bearer token can be either the JWT or a
-func AuthorizationHeaderParser() gin.HandlerFunc {
+func AuthorizationHeaderParser(userRepo repositories.UserRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		h := c.GetHeader("Authorization")
 		if h != "" {
@@ -48,20 +48,19 @@ func AuthorizationHeaderParser() gin.HandlerFunc {
 					}
 
 					// Get the user
-					repoResult := repositories.UserRepo.GetById(uint(userId))
-					if repoResult.Error != nil {
+					foundUser, repoErr := userRepo.GetById(uint(userId))
+					if repoErr.Err != nil {
 						goto NextHandler
 					}
-					user = repoResult.Result.(models.User)
+					user = foundUser
 				} else if strings.HasPrefix(h, "ST ") { // Session token bearer
 					h = h[3:]
 
-					repoResult := repositories.UserRepo.GetBySessionToken(h)
-					if repoResult.Error != nil {
+					foundUser, repoErr := userRepo.GetBySessionToken(h)
+					if repoErr.Err != nil {
 						goto NextHandler
 					}
-
-					user = repoResult.Result.(models.User)
+					user = foundUser
 				} else {
 					goto NextHandler
 				}

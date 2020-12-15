@@ -12,20 +12,19 @@ import (
 var Db *gorm.DB
 
 // Runs the automatic database migrations of gorm and more advanced migrations (if needed).
-func RunMigrations() {
+func RunMigrations(db *gorm.DB) {
 	// Basic gorm migrations
-	err := Db.AutoMigrate(&models.User{}, &models.SessionToken{}, &models.Deck{}, &models.BlackCard{}, &models.WhiteCard{})
+	err := db.AutoMigrate(&models.User{}, &models.SessionToken{}, &models.Deck{}, &models.BlackCard{}, &models.WhiteCard{})
 	if err != nil {
 		log.Panic(err)
 	}
 }
 
 // Creates a database connection and places it into the global database object.
-func SetupDatabaseConnection() {
+func SetupDatabaseConnection() *gorm.DB {
 	database, err := gorm.Open(postgres.Open(viper.GetString("dbDsn")), &gorm.Config{})
 	if err != nil {
 		log.Panic(err)
 	}
-
-	Db = database
+	return database
 }

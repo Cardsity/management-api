@@ -2,7 +2,6 @@ package models
 
 import (
 	"github.com/Cardsity/management-api/utils"
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -15,11 +14,11 @@ const (
 )
 
 type User struct {
-	gorm.Model
+	ID            uint   `gorm:"primarykey"`
 	Username      string `gorm:"index;unique;not null"`
 	Password      string `gorm:"not null"`
 	Admin         bool
-	Role          Role
+	Role          Role `gorm:"not null"`
 	SessionTokens []SessionToken
 	Decks         []Deck `gorm:"foreignKey:OwnerID"`
 }
@@ -30,7 +29,7 @@ func (u *User) IsPasswordEqual(password string) (bool, error) {
 }
 
 type SessionToken struct {
-	gorm.Model
+	ID         uint      `gorm:"primarykey"`
 	Token      string    `gorm:"index;unique;not null"`
 	ValidUntil time.Time `gorm:"not null"`
 	UserID     uint

@@ -1,17 +1,26 @@
 package web
 
 import (
+	"github.com/Cardsity/management-api/db/repositories"
 	"github.com/Cardsity/management-api/web/middleware"
 	"github.com/Cardsity/management-api/web/validators"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
-type Router struct{}
+type RouteEnvironment struct {
+	UserRepo repositories.UserRepository
+}
+
+type Router struct {
+	RouteEnvironment
+}
 
 // Creates a new Router instance.
-func NewRouter() *Router {
-	return &Router{}
+func NewRouter(environment RouteEnvironment) *Router {
+	return &Router{
+		RouteEnvironment: environment,
+	}
 }
 
 // Returns a gin.Engine with the necessary setup for the server.
@@ -24,11 +33,11 @@ func (router *Router) GetEngine() *gin.Engine {
 		log.Fatal("Can not register custom validators:", err)
 	}
 
-	r.Use(middleware.AuthorizationHeaderParser())
+	r.Use(middleware.AuthorizationHeaderParser(router.RouteEnvironment.UserRepo))
 
 	// TODO: Use the .Error function from gin.Context for error handling
 
-	rc := NewRouteController()
+	rc := NewRouteController(router.RouteEnvironment)
 	v1 := r.Group("/v1")
 	{
 		v1.GET("/reachable", rc.Reachable)
@@ -56,9 +65,13 @@ func (router *Router) GetEngine() *gin.Engine {
 }
 
 // Contains all routes.
-type RouteController struct{}
+type RouteController struct {
+	RouteEnvironment
+}
 
 // Returns a new RouteController instance.
-func NewRouteController() *RouteController {
-	return &RouteController{}
+func NewRouteController(environment RouteEnvironment) *RouteController {
+	return &RouteController{
+		RouteEnvironment: environment,
+	}
 }
