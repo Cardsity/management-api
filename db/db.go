@@ -8,10 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// Holds the global database object.
-var Db *gorm.DB
-
-// Runs the automatic database migrations of gorm and more advanced migrations (if needed).
+// Runs the automatic database migrations of gorm and more advanced migrations (if needed) on the supplied database.
 func RunMigrations(db *gorm.DB) {
 	// Basic gorm migrations
 	err := db.AutoMigrate(&models.User{}, &models.SessionToken{}, &models.Deck{}, &models.BlackCard{}, &models.WhiteCard{})
@@ -20,8 +17,9 @@ func RunMigrations(db *gorm.DB) {
 	}
 }
 
-// Creates a database connection and places it into the global database object.
+// Creates a database connection.
 func SetupDatabaseConnection() *gorm.DB {
+	// TODO: Make dbDsn a parameter
 	database, err := gorm.Open(postgres.Open(viper.GetString("dbDsn")), &gorm.Config{})
 	if err != nil {
 		log.Panic(err)

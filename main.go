@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Cardsity/management-api/db"
 	"github.com/Cardsity/management-api/db/repositories/gorm"
 	"github.com/Cardsity/management-api/web"
@@ -8,6 +9,16 @@ import (
 	"github.com/spf13/viper"
 	"strconv"
 )
+
+// TODO:
+// - Remove the need of the gameserver access token, allow access only with the key or from a specific ips or an ip
+//   range. This could be either done through a whitelist in the config oder through automatic discovery and docker.
+// - Write more tests, especially the repositories and the routes. For that, I probably have to implement a memory
+//   repository.
+// - Split the model from the gorm.Model
+// - Restructure top-level folders
+// - Refactor the JWT system and its package
+// - Maybe: Implement cache for the gorm repository
 
 // Handles the configuration.
 func config() {
@@ -43,7 +54,7 @@ func config() {
 func ensureConfigKeyIsPresentString(key string) {
 	v := viper.GetString(key)
 	if v == "" {
-		log.Panic("Config key '%v' was not set", key)
+		log.Panic(fmt.Sprintf("Config key '%v' was not set", key))
 	}
 }
 
