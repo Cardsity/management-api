@@ -55,10 +55,12 @@ func main() {
 
 	// TODO: Make this configurable
 	userRepo := gorm.UserRepository{BaseRepository: gorm.BaseRepository{Db: database}}
+	deckRepo := gorm.DeckRepository{BaseRepository: gorm.BaseRepository{Db: database}}
 
 	// Get the engine
 	environment := web.RouteEnvironment{
 		UserRepo: userRepo,
+		DeckRepo: deckRepo,
 	}
 	router := web.NewRouter(environment)
 	r := router.GetEngine()

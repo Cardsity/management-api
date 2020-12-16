@@ -8,8 +8,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Contains everything that is needed for the api so it can operate smoothly. This includes repositories or additional
+// external hooks, for example.
 type RouteEnvironment struct {
 	UserRepo repositories.UserRepository
+	DeckRepo repositories.DeckRepository
 }
 
 type Router struct {

@@ -11,8 +11,20 @@ type BaseRepository struct {
 }
 
 // Performs a simple operation that queries according to the where parameter and writes to first.
+// It just proxies the call to getWithPreload with an empty string slice for preloading.
 func (br *BaseRepository) get(where interface{}, first interface{}) repositories.RepositoryError {
-	result := br.Db.Where(where).First(first)
+	return br.getWithPreload(where, first, []string{})
+}
+
+// Performs a simple operation that queries according to the where parameter and writes to first. Preloads the fields
+// according to the preload parameter.
+func (br *BaseRepository) getWithPreload(where interface{}, first interface{}, preload []string) repositories.RepositoryError {
+	result := br.Db.Where(where)
+	// Preload supplied fields, will only execute when there are elements in the supplied preload string slice
+	for _, v := range preload {
+		result = result.Preload(v)
+	}
+	result = result.First(first)
 	if result.Error != nil {
 		return repositories.NewRepositoryError(result.Error)
 	}

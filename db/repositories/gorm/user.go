@@ -21,8 +21,6 @@ func (u UserRepository) GetById(id uint) (models.User, repositories.RepositoryEr
 	if err.Err != nil {
 		return models.User{}, err
 	}
-
-	// Parse user
 	return user, repositories.RepositoryError{}
 }
 
@@ -35,8 +33,6 @@ func (u UserRepository) GetByUsername(username string) (models.User, repositorie
 	if err.Err != nil {
 		return models.User{}, err
 	}
-
-	// Parse user
 	return user, repositories.RepositoryError{}
 }
 

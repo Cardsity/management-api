@@ -1,8 +1,6 @@
 package web
 
 import (
-	"github.com/Cardsity/management-api/db/models"
-	"github.com/Cardsity/management-api/db/repositories"
 	"github.com/Cardsity/management-api/web/response"
 	"github.com/Cardsity/management-api/web/validators"
 	"github.com/gin-gonic/gin"
@@ -35,24 +33,22 @@ func (rc *RouteController) RandomCards(c *gin.Context) {
 
 	// Get the cards
 	if randomCardRequest.Type == validators.BlackCard {
-		rr := repositories.BlackCardRepo.RandomAmount(randomCardRequest.Amount, randomCardRequest.DeckIDs)
-		if rr.Error != nil {
-			rr.HandleGin(c)
+		cards, repoErr := rc.DeckRepo.GetRandomAmountOfBlackCards(randomCardRequest.Amount, randomCardRequest.DeckIDs)
+		if repoErr.Err != nil {
+			repoErr.HandleGin(c)
 			return
 		}
-		cards := rr.Result.([]models.BlackCard)
 
 		// Convert the cards into the right format
 		for _, card := range cards {
 			cardsInterfaceSlice = append(cardsInterfaceSlice, cardInfoResponseFromBlackCard(card))
 		}
 	} else { // White card
-		rr := repositories.WhiteCardRepo.RandomAmount(randomCardRequest.Amount, randomCardRequest.DeckIDs)
-		if rr.Error != nil {
-			rr.HandleGin(c)
+		cards, repoErr := rc.DeckRepo.GetRandomAmountOfWhiteCards(randomCardRequest.Amount, randomCardRequest.DeckIDs)
+		if repoErr.Err != nil {
+			repoErr.HandleGin(c)
 			return
 		}
-		cards := rr.Result.([]models.WhiteCard)
 
 		// Convert the cards into the right format
 		for _, card := range cards {

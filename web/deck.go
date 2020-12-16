@@ -2,7 +2,6 @@ package web
 
 import (
 	"github.com/Cardsity/management-api/db/models"
-	"github.com/Cardsity/management-api/db/repositories"
 	"github.com/Cardsity/management-api/utils"
 	"github.com/Cardsity/management-api/web/response"
 	"github.com/gin-gonic/gin"
@@ -27,12 +26,7 @@ func (dcr *DeckCreateRequest) AmountWhiteCards() int {
 	return len(dcr.WhiteCards)
 }
 
-type DeckCreateResponse struct {
-	ID               uint `json:"id"`
-	AmountBlackCards int  `json:"amountBlackCards"`
-	AmountWhiteCards int  `json:"amountWhiteCards"`
-}
-
+// Responsible for deck creation.
 func (rc *RouteController) DeckCreate(c *gin.Context) {
 	var deckReq DeckCreateRequest
 	if err := c.ShouldBindJSON(&deckReq); err != nil {
@@ -77,40 +71,14 @@ func (rc *RouteController) DeckCreate(c *gin.Context) {
 		return
 	}
 
-	// Generate black card models
-	var blackCards []models.BlackCard
-	for _, text := range deckReq.BlackCards {
-		blackCards = append(blackCards, models.BlackCard{
-			Text: text,
-		})
-	}
-	// Generate white card models
-	var whiteCards []models.WhiteCard
-	for _, text := range deckReq.WhiteCards {
-		whiteCards = append(whiteCards, models.WhiteCard{
-			Text: text,
-		})
-	}
-
 	// Create the deck
-	deck := models.Deck{
-		Name:       deckReq.Name,
-		Official:   deckReq.Official,
-		Owner:      user,
-		BlackCards: blackCards,
-		WhiteCards: whiteCards,
-	}
-	repoResult := repositories.DeckRepo.Create(&deck)
-	if repoResult.Error != nil {
-		repoResult.HandleGin(c)
+	repoErr := rc.DeckRepo.Create(deckReq.Name, user.ID, deckReq.Official, deckReq.BlackCards, deckReq.WhiteCards)
+	if repoErr.Err != nil {
+		repoErr.HandleGin(c)
 		return
 	}
 
-	response.Ok(c, DeckCreateResponse{
-		ID:               deck.ID,
-		AmountBlackCards: amountBlackCards,
-		AmountWhiteCards: amountWhiteCards,
-	})
+	response.Ok(c, nil)
 }
 
 type DeckInfoResponseBlackCard struct {
@@ -159,12 +127,11 @@ func (rc *RouteController) DeckInfo(c *gin.Context) {
 	}
 
 	// Get deck
-	repoResult := repositories.DeckRepo.GetById(uint(deckId), true)
-	if repoResult.Error != nil {
-		repoResult.HandleGin(c)
+	deck, repoErr := rc.DeckRepo.Get(uint(deckId), true)
+	if repoErr.Err != nil {
+		repoErr.HandleGin(c)
 		return
 	}
-	deck := repoResult.Result.(models.Deck)
 
 	// Generate deck info response
 	// TODO: Is there a better way to achieve this?
