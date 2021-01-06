@@ -5,6 +5,7 @@ import (
 	"github.com/Cardsity/management-api/web/response"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"strings"
 )
 
 // TODO: Implement cache for the repositories
@@ -40,6 +41,16 @@ func NewRepositoryError(raw error) RepositoryError {
 	if errors.Is(raw, gorm.ErrRecordNotFound) {
 		return RepositoryError{
 			Err: ErrorRecordNotFound,
+			raw: raw,
+		}
+		// TODO: This is just a workaround, but as it seems there is no way to actually know if we violated the unique
+		//       constraint. This would mean that either we have find another way around this or that gorm implements
+		//       something for this. If there is a better solution, I'm open for PRs or ideas. Just open an issue and we
+		//       can discuss that :) Additionally, it seems that gorm does not even has an error type for that kind of
+		//       errors.
+	} else if strings.Contains(raw.Error(), "ERROR: duplicate key value violates unique constraint \"users_username_key\" (SQLSTATE 23505)") {
+		return RepositoryError{
+			Err: ErrorUserUsernameAlreadyExists,
 			raw: raw,
 		}
 	} else {
